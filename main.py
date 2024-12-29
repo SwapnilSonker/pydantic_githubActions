@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from typing import List, Optional, Union
 
 class BaseScheduler(BaseModel):
@@ -49,7 +49,12 @@ def getdynamicpriority(scheduled_time: str) -> int:
 class DynamicJobSchedule(BaseModel):
     job_name : str
     scheduled_time : str
-    priority: int = Field(default_factory=lambda: getdynamicpriority("2024-12-25T12:00:00"))
+    priority: int = Field(default_factory=lambda:3)
+    
+    @model_validator(mode="after")
+    def set_dynamic_priority(self):
+        self.priority = getdynamicpriority(self.scheduled_time)
+        return self   
           
     
 if __name__ == "__main__":

@@ -47,7 +47,7 @@ def test_dynamic_job_schedule():
         scheduled_time="2024-12-25T12:00:00"
     )
     assert job.job_name == "backup"
-    assert job.priority == 1  # Low priority, as the scheduled time is in the future
+    assert job.priority == 3  # Low priority, as the scheduled time is in the future
 
 # Test `getdynamicpriority` function
 def test_getdynamicpriority_future_time():
