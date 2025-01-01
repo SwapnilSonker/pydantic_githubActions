@@ -9,7 +9,6 @@ on:
     branches:     
       - master
 
-
 jobs:
   build:
     runs-on: ubuntu-latest   
@@ -18,54 +17,46 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-
-    - name: Set up python
+    - name: Set up Python
       uses: actions/setup-python@v4         
       with:
         python-version: "3.9.13"
 
-
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt   
-
+        pip install -r requirements.txt
 
     - name: Log in to Docker Hub
-       uses: docker/login-action@v2
-       with:
-         username: ${{secrets.DOCKER_USERNAME}}
-         password: ${{secrets.DOCKER_PASSWORD}}
-  
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build Docker image
       run: |
-      docker build -t ${{secrets.DOCKER_USERNAME}}/firecrawl_pydantic:latest .
-
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/firecrawl_pydantic:latest .
 
     - name: Push Docker image
       run: |
-      docker push ${{secrets.DOCKER_USERNAME}}/firecrawl_pydantic:latest
-
+        docker push ${{ secrets.DOCKER_USERNAME }}/firecrawl_pydantic:latest
 
     - name: Run Docker container
       run: |
-      docker run --name firecrawl -d -p 5000:5000 ${{secrets.DOCKER_USERNAME}}/firecrawl_pydantic:latest 
-
+        docker run --name firecrawl -d -p 5000:5000 ${{ secrets.DOCKER_USERNAME }}/firecrawl_pydantic:latest
 
     - name: Run tests inside Docker container
       run: |
-      docker exec firecrawl pytest --maxfail=1 --disable-warnings
+        docker exec firecrawl pytest --maxfail=1 --disable-warnings
 
-
-    - name: Cleanup docker container
+    - name: Cleanup Docker container
       run: |
-      docker stop firecrawl_pydantic
-      docker rm firecrawl_pyadantic
+        docker stop firecrawl
+        docker rm firecrawl
 
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v3    
       with:
-       name: test-results
-       path: .pytest_cache/        
+        name: test-results
+        path: .pytest_cache/
