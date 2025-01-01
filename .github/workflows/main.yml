@@ -47,7 +47,7 @@ jobs:
 
     - name: Run tests inside Docker container
       run: |
-        docker exec beautiful_cray pytest --maxfail=1 --disable-warnings
+        docker exec beautiful_cray pytest -v --maxfail=1 --disable-warnings
 
     - name: Cleanup Docker container
       run: |
