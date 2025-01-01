@@ -22,15 +22,6 @@ jobs:
       with:
         python-version: "3.9.13"
 
-    - name: Set Python environment variables
-      run: |
-        export pythonLocation=/opt/hostedtoolcache/Python/3.9.13/x64
-        export PKG_CONFIG_PATH=/opt/hostedtoolcache/Python/3.9.13/x64/lib/pkgconfig
-        export Python_ROOT_DIR=/opt/hostedtoolcache/Python/3.9.13/x64
-        export Python2_ROOT_DIR=/opt/hostedtoolcache/Python/3.9.13/x64
-        export Python3_ROOT_DIR=/opt/hostedtoolcache/Python/3.9.13/x64
-        export LD_LIBRARY_PATH=/opt/hostedtoolcache/Python/3.9.13/x64/lib
-        
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -52,11 +43,11 @@ jobs:
       #always write the container name in the run command
     - name: Run Docker container with increased memory
       run: |
-        docker run --memory="2g" --name beautiful_cray -d -p 5000:5000 ${{ secrets.DOCKER_USERNAME }}/firecrawl_pydantic:latest
+        docker run --name beautiful_cray -d -p 5000:5000 ${{ secrets.DOCKER_USERNAME }}/firecrawl_pydantic:latest
 
     - name: Run tests inside Docker container
       run: |
-        docker exec beautiful_cray pytest -v --maxfail=1 --disable-warnings
+        docker exec beautiful_cray pytest -v --maxfail=0 --disable-warnings
 
     - name: Cleanup Docker container
       run: |
