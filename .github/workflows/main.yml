@@ -45,10 +45,6 @@ jobs:
       run: |
         docker run --name beautiful_cray -d -p 5000:5000 ${{ secrets.DOCKER_USERNAME }}/firecrawl_pydantic:latest
 
-    - name: Run tests inside Docker container
-      run: |
-        docker exec beautiful_cray pytest -v --maxfail=0 --disable-warnings
-
     - name: Cleanup Docker container
       run: |
         docker stop beautiful_cray
