@@ -43,7 +43,7 @@ jobs:
       #always write the container name in the run command
     - name: Run Docker container with increased memory
       run: |
-        docker run --name beautiful_cray -d -p 5000:5000 ${{ secrets.DOCKER_USERNAME }}/firecrawl_pydantic:latest
+        docker run --memory="2g" --name beautiful_cray -d -p 5000:5000 ${{ secrets.DOCKER_USERNAME }}/firecrawl_pydantic:latest
 
     - name: Run tests inside Docker container
       run: |
