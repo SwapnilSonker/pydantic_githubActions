@@ -2,3 +2,5 @@ pydantic
 pytest
 docker
 pytest-docker
+
+playwright
