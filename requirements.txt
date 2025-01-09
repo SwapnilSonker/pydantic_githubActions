@@ -4,3 +4,4 @@ docker
 pytest-docker
 
 playwright
+APScheduler
