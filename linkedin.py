@@ -4,7 +4,7 @@ from time import sleep
 
 def login_to_linkedin(username, password):
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=True)
         context = browser.new_context()
         page = context.new_page()
         
@@ -33,10 +33,10 @@ def login_to_linkedin(username, password):
         # Filter search results by "People"
         page.get_by_role("button", name="People").click()
         print("Filtered by 'People'")
-        
-        while True:
+        request_connect = 0
+        while request_connect <= 10:
             
-            previous_scroll_height = 0
+            
             scroll_attempts = 0
 
             # Start connecting with people
@@ -65,6 +65,7 @@ def login_to_linkedin(username, password):
                         send_button = page.locator('//button//span[text()="Send"]')
                         if send_button.is_visible():
                             send_button.click()
+                            request_connect += 1
                             print("Clicked 'Send' button.")
                         else:
                             print("No 'Send' button found.")
