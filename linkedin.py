@@ -3,6 +3,13 @@ from time import sleep
 from apscheduler.schedulers.background import BackgroundScheduler 
 from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
 import threading
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+Email = os.getenv("Linkedin_mail")
+Password = os.getenv("Linkedin_password")
 
 def login_to_linkedin(username, password):
     with sync_playwright() as p:
@@ -36,7 +43,7 @@ def login_to_linkedin(username, password):
         page.get_by_role("button", name="People").click()
         # print("Filtered by 'People'")
         request_connect = 0
-        max_requests = 1
+        max_requests = 15
         while request_connect <= max_requests:
             
             
@@ -57,7 +64,7 @@ def login_to_linkedin(username, password):
                 # scroll_attempts = 0  # Reset scroll attempts if buttons are found
                 print(f"Found {count_connect} 'Connect' buttons on the page.")
                 
-                for i in range(min(count_connect ,max_requests - request_connect)):
+                for i in range(count_connect):
                     try:
                         # Click on the "Connect" button
                         connect_buttons.nth(i).click()
@@ -101,18 +108,18 @@ def job_listener(event):
                 
 
 if __name__ == "__main__":
-    # login = login_to_linkedin("swapnilsonker04@gmail.com", "Swapnil@04")
+    
     scheduler = BackgroundScheduler()
     
-    scheduler.add_job(lambda:login_to_linkedin("swapnilsonker04@gmail.com", "Swapnil@04") , 'cron', hour=18, minute=16)
+    scheduler.add_job(lambda:login_to_linkedin(Email, Password) , 'cron', hour=17, minute=27)
     
     scheduler.add_listener(job_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
     try:
         print("Scheduler started")
         scheduler.start()
-        
-        while True:
-          sleep(2)
+         
+        while scheduler.get_jobs():
+            sleep(2)
     except (KeyboardInterrupt, SystemExit):
         print("scheduler exited from main")
         scheduler.shutdown()
