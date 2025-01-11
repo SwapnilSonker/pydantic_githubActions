@@ -6,3 +6,4 @@ pytest-docker
 playwright
 APScheduler
 python-dotenv
+pytz

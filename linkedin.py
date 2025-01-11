@@ -7,11 +7,30 @@ from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
 import threading
 from dotenv import load_dotenv
 import os
+import pytz
 import smtplib
+import logging
+from logging.handlers import RotatingFileHandler
+
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('app.log'),
+        logging.StreamHandler()
+    ]
+)
+
+logger = logging.getLogger(__name__)
+
+handler = RotatingFileHandler('app.log', maxBytes=1000000, backupCount=3)
+logger.addHandler(handler)
 
 load_dotenv()
 
 Email = os.getenv("Linkedin_mail")
+Password = os.getenv("Linkedin_password")
 Password = os.getenv("Linkedin_password")
 
 email_password = os.getenv("Email_password")
@@ -49,16 +68,16 @@ def login_to_linkedin(username, password):
         
         # Navigate to LinkedIn login page
         page.goto("https://www.linkedin.com/login")
-        print("LinkedIn opened successfully")
+        logger.info("LinkedIn opened successfully")
         
         # Log in to LinkedIn
         page.fill("input#username", username)
         page.fill("input#password", password)
         page.click("button[type='submit']")
-        
         page.wait_for_timeout(5000)
         page.wait_for_url("https://www.linkedin.com/feed/")
         print("Logged in successfully!!")
+        logger.info("Logged in successfully!!")
         send_notification("Job Started", "The LinkedIn bot job has started running, logged in successfully.")
         
         # Search for "YC"
@@ -129,13 +148,13 @@ def login_to_linkedin(username, password):
 
 def job_listener(event):
     if event.exception:
-        print(f"job failed: {event.job_id}")
+        logger.error(f"job failed: {event.job_id}")
         send_notification(
         "Job Failed", 
         f"The LinkedIn bot job failed with Job ID: {event.job_id}"
         )
     else:
-        print(f"job completed successfully: {event.job_id}")
+        logger.info(f"job completed successfully: {event.job_id}")
         send_notification(
         "Job Completed", 
         f"The LinkedIn bot job finished successfully with job id : {event.job_id}"
@@ -148,7 +167,8 @@ def job_listener(event):
 
 if __name__ == "__main__":
     
-    scheduler = BackgroundScheduler()
+    local_timezone = pytz.timezone("Asia/Kolkata")
+    scheduler = BackgroundScheduler(timezone=local_timezone)
     
     scheduler.add_job(lambda:login_to_linkedin(Email, Password) , 'cron', hour=13, minute=38)
     

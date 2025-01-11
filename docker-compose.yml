@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  linkedin-bot:
+    build: 
+      context: .
+      dockerfile: dockerfile.new
+    environment:
+     - Linkedin_mail= ${Linkedin_mail}
+     - Linkedin_password = ${Linkedin_password}
+     - Email_password = ${Email_password}
+    restart: on-failure
+    volumes:
+     - ./logs:/app/logs
+    working_dir: /app
+    command: python linkedin.py 
+    ports:
+      - "8000:8000"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"  
