@@ -1,3 +1,5 @@
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from playwright.sync_api import sync_playwright
 from time import sleep
 from apscheduler.schedulers.background import BackgroundScheduler 
@@ -5,11 +7,39 @@ from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
 import threading
 from dotenv import load_dotenv
 import os
+import smtplib
 
 load_dotenv()
 
 Email = os.getenv("Linkedin_mail")
 Password = os.getenv("Linkedin_password")
+
+email_password = os.getenv("Email_password")
+
+def send_notification(subject, message):
+    try:
+        sender_email = "swapnilsonker04@gmail.com"
+        sender_password = email_password
+        receiver_email = "swapnilsonker04@gmail.com"
+        
+        email = MIMEMultipart()
+        email['From'] = sender_email
+        email['To'] = receiver_email
+        email['Subject'] = subject
+        email.attach(MIMEText(message, 'plain'))
+        
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, receiver_email, email.as_string())
+        server.quit()
+        
+        print(f"Notification sent: {subject}")
+    except Exception as e:
+        print(f"Failed to send notification :{e}")    
+    
+    
+    
 
 def login_to_linkedin(username, password):
     with sync_playwright() as p:
@@ -29,6 +59,7 @@ def login_to_linkedin(username, password):
         page.wait_for_timeout(5000)
         page.wait_for_url("https://www.linkedin.com/feed/")
         print("Logged in successfully!!")
+        send_notification("Job Started", "The LinkedIn bot job has started running, logged in successfully.")
         
         # Search for "YC"
         search_input = page.locator('.search-global-typeahead__input')
@@ -99,8 +130,16 @@ def login_to_linkedin(username, password):
 def job_listener(event):
     if event.exception:
         print(f"job failed: {event.job_id}")
+        send_notification(
+        "Job Failed", 
+        f"The LinkedIn bot job failed with Job ID: {event.job_id}"
+        )
     else:
         print(f"job completed successfully: {event.job_id}")
+        send_notification(
+        "Job Completed", 
+        f"The LinkedIn bot job finished successfully with job id : {event.job_id}"
+        )
     
     print("scheduler exited from function")    
     threading.Thread(target=scheduler.shutdown).start()
@@ -111,13 +150,12 @@ if __name__ == "__main__":
     
     scheduler = BackgroundScheduler()
     
-    scheduler.add_job(lambda:login_to_linkedin(Email, Password) , 'cron', hour=17, minute=27)
+    scheduler.add_job(lambda:login_to_linkedin(Email, Password) , 'cron', hour=13, minute=38)
     
     scheduler.add_listener(job_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
     try:
         print("Scheduler started")
         scheduler.start()
-         
         while scheduler.get_jobs():
             sleep(2)
     except (KeyboardInterrupt, SystemExit):
