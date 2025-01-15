@@ -122,7 +122,7 @@ def login_to_linkedin(username, password):
                         page.wait_for_timeout(5000)
                         
                         # Check for the "Send" button and click if visible
-                        send_button = page.locator('//button//span[text()="Send"]')
+                        send_button = page.locator('//button//span[text()="Send" or text()="Send without a note"]')
                         if send_button.is_visible():
                             send_button.click()
                             request_connect += 1
